@@ -1,4 +1,3 @@
-import math
 from enum import Enum
 
 import torch
@@ -52,4 +51,3 @@ class Wrapper(object):
             raise ValueError
 
         return pool
-

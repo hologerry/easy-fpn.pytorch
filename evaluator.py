@@ -31,10 +31,10 @@ class Evaluator(object):
                 detection_bboxes, detection_classes, detection_probs = forward_output
                 detection_bboxes /= scale
 
-                selected_indices = (detection_probs > 0.05).nonzero().view(-1)
-                detection_bboxes = detection_bboxes[selected_indices]
-                detection_classes = detection_classes[selected_indices]
-                detection_probs = detection_probs[selected_indices]
+                kept_indices = (detection_probs > 0.05).nonzero().view(-1)
+                detection_bboxes = detection_bboxes[kept_indices]
+                detection_classes = detection_classes[kept_indices]
+                detection_probs = detection_probs[kept_indices]
 
                 all_detection_bboxes.extend(detection_bboxes.tolist())
                 all_detection_classes.extend(detection_classes.tolist())

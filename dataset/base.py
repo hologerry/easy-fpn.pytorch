@@ -1,9 +1,8 @@
 from enum import Enum
-from typing import Tuple, List, Type
+from typing import List, Tuple, Type
 
 import PIL
 import torch.utils.data.dataset
-from PIL import Image
 from torch import Tensor
 from torchvision.transforms import transforms
 
@@ -14,11 +13,14 @@ class Base(torch.utils.data.dataset.Dataset):
         TRAIN = 'train'
         EVAL = 'eval'
 
-    OPTIONS = ['voc2007', 'coco2017', 'voc2007-cat-dog', 'coco2017-person', 'coco2017-car', 'coco2017-animal']
+    OPTIONS = ['receipt', 'voc2007', 'coco2017', 'voc2007-cat-dog', 'coco2017-person', 'coco2017-car', 'coco2017-animal']
 
     @staticmethod
     def from_name(name: str) -> Type['Base']:
-        if name == 'voc2007':
+        if name == 'receipt':
+            from dataset.receipt_0158_0062 import Receipt
+            return Receipt
+        elif name == 'voc2007':
             from dataset.voc2007 import VOC2007
             return VOC2007
         elif name == 'coco2017':

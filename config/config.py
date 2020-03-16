@@ -1,8 +1,7 @@
-from typing import Tuple, List
-
 import ast
+from typing import List, Tuple
 
-from roi.wrapper import Wrapper as ROIWrapper
+from roi.pooler import Pooler
 
 
 class Config(object):
@@ -12,7 +11,7 @@ class Config(object):
 
     ANCHOR_RATIOS: List[Tuple[int, int]] = [(1, 2), (1, 1), (2, 1)]
     ANCHOR_SCALES: List[int] = [1]
-    POOLING_MODE: ROIWrapper.Mode = ROIWrapper.Mode.ALIGN
+    POOLER_MODE: Pooler.Mode = Pooler.Mode.ALIGN
 
     @classmethod
     def describe(cls):
@@ -24,7 +23,7 @@ class Config(object):
 
     @classmethod
     def setup(cls, image_min_side: float = None, image_max_side: float = None,
-              anchor_ratios: List[Tuple[int, int]] = None, anchor_scales: List[int] = None, pooling_mode: str = None):
+              anchor_ratios: List[Tuple[int, int]] = None, anchor_scales: List[int] = None, pooler_mode: str = None):
         if image_min_side is not None:
             cls.IMAGE_MIN_SIDE = image_min_side
         if image_max_side is not None:
@@ -34,5 +33,5 @@ class Config(object):
             cls.ANCHOR_RATIOS = ast.literal_eval(anchor_ratios)
         if anchor_scales is not None:
             cls.ANCHOR_SCALES = ast.literal_eval(anchor_scales)
-        if pooling_mode is not None:
-            cls.POOLING_MODE = ROIWrapper.Mode(pooling_mode)
+        if pooler_mode is not None:
+            cls.POOLER_MODE = Pooler.Mode(pooler_mode)

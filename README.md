@@ -10,7 +10,7 @@ An easy implementation of [FPN](https://arxiv.org/pdf/1612.03144.pdf) in PyTorch
 
 ## Features
 
-* Supports PyTorch 0.4.1
+* Supports PyTorch 1.x
 * Supports `PASCAL VOC 2007` and `MS COCO 2017` datasets
 * Supports `ResNet-18`, `ResNet-50` and `ResNet-101` backbones (from official PyTorch model)
 * Supports `ROI Pooling` and `ROI Align` pooling modes

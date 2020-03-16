@@ -6,12 +6,13 @@ from torch import nn, Tensor
 from torch.nn import functional as F
 
 from bbox import BBox
-from nms.nms import NMS
+from support.layer.nms import nms
 
 
 class RegionProposalNetwork(nn.Module):
 
-    def __init__(self, num_features_out: int, anchor_ratios: List[Tuple[int, int]], anchor_scales: List[int], pre_nms_top_n: int, post_nms_top_n: int):
+    def __init__(self, num_features_out: int, anchor_ratios: List[Tuple[int, int]],
+                 anchor_scales: List[int], pre_nms_top_n: int, post_nms_top_n: int):
         super().__init__()
 
         self._features = nn.Sequential(
@@ -88,7 +89,9 @@ class RegionProposalNetwork(nn.Module):
 
         return sample_fg_indices, sample_selected_indices, gt_anchor_objectnesses, gt_anchor_transformers
 
-    def loss(self, anchor_objectnesses: Tensor, anchor_transformers: Tensor, gt_anchor_objectnesses: Tensor, gt_anchor_transformers: Tensor) -> Tuple[Tensor, Tensor]:
+    def loss(self, anchor_objectnesses: Tensor, anchor_transformers: Tensor,
+             gt_anchor_objectnesses: Tensor,
+             gt_anchor_transformers: Tensor) -> Tuple[Tensor, Tensor]:
         cross_entropy = F.cross_entropy(input=anchor_objectnesses, target=gt_anchor_objectnesses)
 
         # NOTE: The default of `reduction` is `elementwise_mean`, which is divided by N x 4 (number of all elements), here we replaced by N for better performance
@@ -97,7 +100,9 @@ class RegionProposalNetwork(nn.Module):
 
         return cross_entropy, smooth_l1_loss
 
-    def generate_anchors(self, image_width: int, image_height: int, num_x_anchors: int, num_y_anchors: int, anchor_size: int) -> Tensor:
+    def generate_anchors(self, image_width: int, image_height: int,
+                         num_x_anchors: int, num_y_anchors: int,
+                         anchor_size: int) -> Tensor:
         center_ys = np.linspace(start=0, stop=image_height, num=num_y_anchors + 2)[1:-1]
         center_xs = np.linspace(start=0, stop=image_width, num=num_x_anchors + 2)[1:-1]
         ratios = np.array(self._anchor_ratios)
@@ -133,8 +138,17 @@ class RegionProposalNetwork(nn.Module):
         proposal_bboxes = BBox.apply_transformer(sorted_anchor_bboxes, sorted_transformers.detach())
         proposal_bboxes = BBox.clip(proposal_bboxes, 0, 0, image_width, image_height)
 
+        # sorted_bboxes = proposal_bboxes[batch_index][sorted_indices[batch_index]][:self._pre_nms_top_n]
+        # sorted_probs = proposal_probs[batch_index][sorted_indices[batch_index]][:self._pre_nms_top_n]
+        # threshold = 0.7
+        # kept_indices = nms(sorted_bboxes, sorted_probs, threshold)
+        # nms_bboxes = sorted_bboxes[kept_indices][:self._post_nms_top_n]
+        # nms_proposal_bboxes_batch.append(nms_bboxes)
+
         proposal_bboxes = proposal_bboxes[:self._pre_nms_top_n]
-        kept_indices = NMS.suppress(proposal_bboxes, threshold=0.7)
+        proposal_score = proposal_score[:self._pre_nms_top_n]
+        threshold = 0.7
+        kept_indices = nms(proposal_bboxes, proposal_score, threshold)
         proposal_bboxes = proposal_bboxes[kept_indices]
         proposal_bboxes = proposal_bboxes[:self._post_nms_top_n]
 
